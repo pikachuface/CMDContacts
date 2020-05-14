@@ -21,6 +21,7 @@ namespace ContactsConsole
                         UI.ShowSearch();
                         break;
                     case (ConsoleKey.C):
+                        UI.ShowAdd();
                         break;
                     case (ConsoleKey.D):
                         break;

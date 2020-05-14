@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Text.RegularExpressions;
+
 
 namespace ContactsConsole
 {
@@ -45,7 +47,7 @@ namespace ContactsConsole
             {
                 for (int i = 0; i < ContactsManager.Contacts.Count; i++)
                 {
-                    Console.WriteLine(ContactsManager.Contacts[i]);
+                    Console.WriteLine(ContactsManager.Contacts[i].GetAll);
                 }
             }
             else
@@ -60,19 +62,20 @@ namespace ContactsConsole
         {
             Console.Title = appName + " - Search";
 
-            Console.Clear();
-            Console.WriteLine("Search mode:\nSearch bar: |");
-            Console.WriteLine("Found:");
-
-            ConsoleKeyInfo input;
-            string searchQuerry = null;
+            bool first = true;
+            ConsoleKeyInfo input =  new ConsoleKeyInfo();
+            string searchQuerry = "";
             do
             {
-                input = Console.ReadKey(true);
+                if (!first)
+                {
+                    input = Console.ReadKey(true);
+                    if (input.Key == ConsoleKey.Backspace && searchQuerry.Length > 0)
+                        searchQuerry = searchQuerry.Remove(searchQuerry.Length - 1);
+                    else if (input.Key!=ConsoleKey.Backspace) searchQuerry += input.KeyChar;
+                }
+                else first = false;
 
-                if (input.Key == ConsoleKey.Backspace && searchQuerry.Length > 0)
-                    searchQuerry = searchQuerry.Remove(searchQuerry.Length - 1);
-                else if (System.Text.RegularExpressions.Regex.IsMatch(input.Key.ToString(), @"^(\p{L}||\d){1}$")) searchQuerry += input.KeyChar;
 
                 Console.Clear();
                 Console.Write("Search mode\nSearch bar: ");
@@ -94,6 +97,49 @@ namespace ContactsConsole
 
             } while (input.Key != ConsoleKey.Escape && input.Key != ConsoleKey.Enter);
         }
+
+        static public void ShowAdd()
+        {
+            Console.Title = appName + " - Add";
+
+            string name;
+            string phoneNum;
+            bool correctInput = false;
+            do
+            {
+                Console.Clear();
+                Console.Write("Add contact:\nName: ");
+                name = Console.ReadLine();
+                Console.Write("Phone number:");
+                phoneNum = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(phoneNum))
+                {
+                    MessageWindow.Show("All information must be filled!", MessageWindow.Type.Warning);
+                }
+                else if (name.Length <= 3)
+                {
+                    MessageWindow.Show("Name must contain at least 3!", MessageWindow.Type.Warning);
+                }
+                else if (!Regex.IsMatch(phoneNum, "([+]\\d{2,3})?([ -]?\\d{3}){3}"))
+                {
+                    MessageWindow.Show("Number must be in correct format!", MessageWindow.Type.Warning);
+                }
+                else if (ContactsManager.Exist(name))
+                {
+                    MessageWindow.Show("Contact with this name already exist!", MessageWindow.Type.Warning);
+                }
+                else correctInput = true;
+            } while (!correctInput);
+
+            if (correctInput)
+            {
+                ContactsManager.AddContact(name, phoneNum);
+            }
+
+
+        }
+
+
 
 
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ContactsConsole
 {
-    public struct Contact
+    public class Contact
     {
         public int ID;
         public string Name;
@@ -13,7 +13,7 @@ namespace ContactsConsole
         {
             get
             {
-                return $"{this.ID} {this.Name} {this.Phone}";
+                return $"{this.ID}. {this.Name} {this.Phone}";
             }
         }
 

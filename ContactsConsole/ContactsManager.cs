@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
+using System.Linq;
+using Newtonsoft.Json;
 namespace ContactsConsole
 {
     static class ContactsManager
@@ -17,24 +18,46 @@ namespace ContactsConsole
 
         static public void WriteContacts()
         {
-
-
-
+            string jsonContacts = JsonConvert.SerializeObject(Contacts);
+            File.WriteAllText(Config.filePath, jsonContacts);
         }
 
         static private void LoadContacts()
         {
-            using (var fs = new FileStream(Config.filePath, FileMode.Open))
+            string inputIO = File.ReadAllText(Config.filePath);
+            try
             {
-                using (var sr = new StreamReader(fs))
+                if (!string.IsNullOrWhiteSpace(inputIO))
                 {
-                    while (!sr.EndOfStream)
-                    {
-                        //Contacts.Add(/*sr.ReadLine()*/);
-                    }
+                    Contacts = JsonConvert.DeserializeObject<List<Contact>>(inputIO);
                 }
             }
+            catch (Exception)
+            {
+                if (MessageWindow.Show("Your contacts file is not formated correctly. \nIt will have to be deleted.\nDo you wish to proceed?", MessageWindow.Type.Error, MessageWindow.Response.YESorNO))
+                {
+                    File.Delete(Config.filePath);
+                }
+                else Environment.Exit(-1);
+            }
         }
+
+        static void SortContacts()
+        {
+            Contacts = Contacts.OrderBy(x => x.Name).ToList();
+            for (int i = 1; i <= Contacts.Count; i++)
+            {
+                Contacts[i-1].ID = i;
+            }
+        }
+
+        static public void AddContact(string name, string number)
+        {
+            Contacts.Add(new Contact(0, name, number));
+            SortContacts();
+            WriteContacts();
+        }
+
 
 
         static private void CheckFiles()
@@ -66,6 +89,12 @@ namespace ContactsConsole
                 }
             }
             return found;
+        }
+
+        static public bool Exist(string name)
+        {
+            if (Contacts.Where(x => x.Name == name).ToArray().Length > 0) return true;
+            return false;
         }
 
 
