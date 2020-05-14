@@ -23,8 +23,6 @@ namespace ContactsConsole
                     case (ConsoleKey.C):
                         UI.ShowAdd();
                         break;
-                    case (ConsoleKey.D):
-                        break;
                 }
 
 

@@ -31,7 +31,6 @@ namespace ContactsConsole
             Console.WriteLine("A) Show all");
             Console.WriteLine("B) Search");
             Console.WriteLine("C) Add");
-            Console.WriteLine("D) Delete");
             Console.WriteLine("\nESC) Exit");
 
             return Console.ReadKey(true);
@@ -63,7 +62,7 @@ namespace ContactsConsole
             Console.Title = appName + " - Search";
 
             bool first = true;
-            ConsoleKeyInfo input =  new ConsoleKeyInfo();
+            ConsoleKeyInfo input = new ConsoleKeyInfo();
             string searchQuerry = "";
             do
             {
@@ -72,7 +71,31 @@ namespace ContactsConsole
                     input = Console.ReadKey(true);
                     if (input.Key == ConsoleKey.Backspace && searchQuerry.Length > 0)
                         searchQuerry = searchQuerry.Remove(searchQuerry.Length - 1);
-                    else if (input.Key!=ConsoleKey.Backspace) searchQuerry += input.KeyChar;
+                    else if (input.Key == ConsoleKey.D && input.Modifiers == ConsoleModifiers.Control)
+                    {
+                        var searchResult = ContactsManager.Search(searchQuerry);
+                        Contact toDelete = null;
+                        if (searchResult.Count == 1)
+                        {
+                            toDelete = searchResult[0];
+                        }
+                        else if (searchResult.Count > 0)
+                        {
+                            if (Int32.TryParse(searchQuerry, out int searchedID))
+                            {
+                                toDelete = ContactsManager.Contacts[searchedID - 1];
+                            }
+                        }
+
+
+                        if (MessageWindow.Show($"Are you sure you want to delete contact: {toDelete.Name}", MessageWindow.Type.Info, MessageWindow.Response.YESorNO))
+                        {
+                            ContactsManager.DeleteContact(toDelete);
+                            MessageWindow.Show($"Contact deleted!", MessageWindow.Type.Info);
+                        }
+
+                    }
+                    else if (input.Key != ConsoleKey.Backspace) searchQuerry += input.KeyChar;
                 }
                 else first = false;
 
@@ -129,25 +152,14 @@ namespace ContactsConsole
                     MessageWindow.Show("Contact with this name already exist!", MessageWindow.Type.Warning);
                 }
                 else correctInput = true;
-            } while (!correctInput);
+
+
+            } while (!correctInput && MessageWindow.Show("Do you want to try again?", MessageWindow.Type.Info, MessageWindow.Response.YESorNO));
 
             if (correctInput)
             {
                 ContactsManager.AddContact(name, phoneNum);
             }
-
-
         }
-
-
-
-
-
-
-
-
-
-
-
     }
 }

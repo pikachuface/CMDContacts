@@ -16,7 +16,7 @@ namespace ContactsConsole
         }
 
 
-        static public void WriteContacts()
+        static void WriteContacts()
         {
             string jsonContacts = JsonConvert.SerializeObject(Contacts);
             File.WriteAllText(Config.filePath, jsonContacts);
@@ -58,6 +58,13 @@ namespace ContactsConsole
             WriteContacts();
         }
 
+        static public void DeleteContact(Contact toDelete)
+        {
+            Contacts.Remove(toDelete);
+            SortContacts();
+            WriteContacts();
+        }
+
 
 
         static private void CheckFiles()
@@ -76,14 +83,14 @@ namespace ContactsConsole
         {
             List<Contact> found = new List<Contact>();
             int searchedID;
-            if (Int32.TryParse(search, out searchedID) && searchedID >= 0 && searchedID <= ContactsManager.Contacts.Count - 1)
+            if (Int32.TryParse(search, out searchedID) && searchedID > 0 && searchedID <= ContactsManager.Contacts.Count)
             {
-                found.Add(Contacts[searchedID]);
+                found.Add(Contacts[searchedID-1]);
             }
             else searchedID = -1;
             for (int i = 0; i < ContactsManager.Contacts.Count; i++)
             {
-                if ($"{ContactsManager.Contacts[i].Name} {ContactsManager.Contacts[i].Phone}".Contains(search) && searchedID != i)
+                if ($"{ContactsManager.Contacts[i].Name.ToLower()} {ContactsManager.Contacts[i].Phone}".Contains(search.ToLower()) && searchedID-1 != i)
                 {
                     found.Add(Contacts[i]);
                 }
